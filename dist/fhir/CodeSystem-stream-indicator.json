@@ -1,0 +1,193 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "stream-indicator",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Ranoka stream indicators (13 codes)</p></div>"
+  },
+  "url": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
+  "version": "1.0.0",
+  "name": "RanokaStreamIndicator",
+  "title": "Ranoka stream indicators",
+  "status": "active",
+  "experimental": false,
+  "publisher": "Ranoka",
+  "description": "Ranoka stream indicators. Defined by the Ranoka citizen stream check (OneAquaHealth IEEE Global Hackathon 2026).",
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 13,
+  "concept": [
+    {
+      "code": "colour",
+      "display": "What colour is the water?",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "De quelle couleur est l'eau ?"
+        },
+        {
+          "language": "mg",
+          "value": "Inona no lokon'ny rano?"
+        }
+      ]
+    },
+    {
+      "code": "smell",
+      "display": "How does it smell?",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Quelle odeur ?"
+        },
+        {
+          "language": "mg",
+          "value": "Manao ahoana ny fofony?"
+        }
+      ]
+    },
+    {
+      "code": "foam",
+      "display": "Is there foam on the water?",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Y a-t-il de la mousse sur l'eau ?"
+        },
+        {
+          "language": "mg",
+          "value": "Misy vovony eny ambonin'ny rano ve?"
+        }
+      ]
+    },
+    {
+      "code": "oil",
+      "display": "Is there a shiny, rainbow film (oil) on the surface?",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Y a-t-il un film brillant aux reflets arc-en-ciel (huile) ?"
+        },
+        {
+          "language": "mg",
+          "value": "Misy sosona mamirapiratra miloko avana (solika) eny ambony ve?"
+        }
+      ]
+    },
+    {
+      "code": "litter",
+      "display": "Is there litter in or near the water?",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Y a-t-il des déchets dans ou près de l'eau ?"
+        },
+        {
+          "language": "mg",
+          "value": "Misy fako ao anaty rano na manodidina ve?"
+        }
+      ]
+    },
+    {
+      "code": "deadAnimals",
+      "display": "Do you see dead fish or animals?",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Voyez-vous des poissons ou animaux morts ?"
+        },
+        {
+          "language": "mg",
+          "value": "Mahita trondro na biby maty ve ianao?"
+        }
+      ]
+    },
+    {
+      "code": "algae",
+      "display": "Green slime or algae on the water?",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Des algues vertes ou de la vase verte sur l'eau ?"
+        },
+        {
+          "language": "mg",
+          "value": "Misy ahidrano maitso (algues) eny ambonin'ny rano ve?"
+        }
+      ]
+    },
+    {
+      "code": "banks",
+      "display": "Plants along the banks?",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Des plantes sur les berges ?"
+        },
+        {
+          "language": "mg",
+          "value": "Misy zavamaniry eny amoron-drano ve?"
+        }
+      ]
+    },
+    {
+      "code": "flow",
+      "display": "How is the water moving?",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Comment l'eau s'écoule-t-elle ?"
+        },
+        {
+          "language": "mg",
+          "value": "Manao ahoana ny fikorianan'ny rano?"
+        }
+      ]
+    },
+    {
+      "code": "invasive",
+      "display": "Did you see invasive plants or animals (e.g. water hyacinth)?",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Avez-vous vu des espèces invasives (ex. jacinthe d'eau) ?"
+        },
+        {
+          "language": "mg",
+          "value": "Nahita zavamaniry na biby manimba (oh. jacinthe d'eau) ve ianao?"
+        }
+      ]
+    },
+    {
+      "code": "temperature",
+      "display": "Water temperature (°C) — if you have a thermometer",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Température de l'eau (°C) — si vous avez un thermomètre"
+        },
+        {
+          "language": "mg",
+          "value": "Hafanan'ny rano (°C) — raha manana thermomètre"
+        }
+      ]
+    },
+    {
+      "code": "ph",
+      "display": "pH — if you have a pH strip",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "pH — si vous avez une bandelette pH"
+        },
+        {
+          "language": "mg",
+          "value": "pH — raha manana taratasy pH"
+        }
+      ]
+    },
+    {
+      "code": "stream-health-index",
+      "display": "Stream health index (0-100)"
+    }
+  ]
+}

@@ -1,0 +1,418 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "ranoka-stream-check",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Ranoka citizen stream check: 12 questions (2 optional).</p></div>"
+  },
+  "url": "https://nambininasafidison.github.io/ranoka/fhir/Questionnaire/ranoka-stream-check",
+  "version": "1.0.0",
+  "name": "RanokaStreamCheck",
+  "title": "Ranoka citizen stream check",
+  "status": "active",
+  "subjectType": [
+    "Location"
+  ],
+  "item": [
+    {
+      "linkId": "colour",
+      "code": [
+        {
+          "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
+          "code": "colour",
+          "display": "What colour is the water?"
+        }
+      ],
+      "text": "What colour is the water?",
+      "type": "choice",
+      "required": true,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "colour.clear",
+            "display": "Clear"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "colour.cloudy",
+            "display": "A bit cloudy"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "colour.brown",
+            "display": "Brown / muddy"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "colour.green",
+            "display": "Green"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "colour.unusual",
+            "display": "Unusual (milky, red, black…)"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "smell",
+      "code": [
+        {
+          "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
+          "code": "smell",
+          "display": "How does it smell?"
+        }
+      ],
+      "text": "How does it smell?",
+      "type": "choice",
+      "required": true,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "smell.none",
+            "display": "No smell"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "smell.earthy",
+            "display": "Natural (earth, plants)"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "smell.sewage",
+            "display": "Rotten / sewage"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "smell.chemical",
+            "display": "Chemical / fuel"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "foam",
+      "code": [
+        {
+          "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
+          "code": "foam",
+          "display": "Is there foam on the water?"
+        }
+      ],
+      "text": "Is there foam on the water?",
+      "type": "choice",
+      "required": true,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "foam.none",
+            "display": "No"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "foam.little",
+            "display": "A little, white"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "foam.lots",
+            "display": "A lot, it does not go away"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "oil",
+      "code": [
+        {
+          "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
+          "code": "oil",
+          "display": "Is there a shiny, rainbow film (oil) on the surface?"
+        }
+      ],
+      "text": "Is there a shiny, rainbow film (oil) on the surface?",
+      "type": "choice",
+      "required": true,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "oil.no",
+            "display": "No"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "oil.yes",
+            "display": "Yes"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "litter",
+      "code": [
+        {
+          "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
+          "code": "litter",
+          "display": "Is there litter in or near the water?"
+        }
+      ],
+      "text": "Is there litter in or near the water?",
+      "type": "choice",
+      "required": true,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "litter.none",
+            "display": "None"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "litter.some",
+            "display": "Some"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "litter.lots",
+            "display": "A lot"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "deadAnimals",
+      "code": [
+        {
+          "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
+          "code": "deadAnimals",
+          "display": "Do you see dead fish or animals?"
+        }
+      ],
+      "text": "Do you see dead fish or animals?",
+      "type": "choice",
+      "required": true,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "deadAnimals.no",
+            "display": "No"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "deadAnimals.yes",
+            "display": "Yes"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "algae",
+      "code": [
+        {
+          "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
+          "code": "algae",
+          "display": "Green slime or algae on the water?"
+        }
+      ],
+      "text": "Green slime or algae on the water?",
+      "type": "choice",
+      "required": true,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "algae.none",
+            "display": "None"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "algae.some",
+            "display": "A little"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "algae.mat",
+            "display": "A thick layer covering the water"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "banks",
+      "code": [
+        {
+          "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
+          "code": "banks",
+          "display": "Plants along the banks?"
+        }
+      ],
+      "text": "Plants along the banks?",
+      "type": "choice",
+      "required": true,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "banks.natural",
+            "display": "Many, natural"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "banks.partial",
+            "display": "Some"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "banks.bare",
+            "display": "None (bare soil or concrete)"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "flow",
+      "code": [
+        {
+          "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
+          "code": "flow",
+          "display": "How is the water moving?"
+        }
+      ],
+      "text": "How is the water moving?",
+      "type": "choice",
+      "required": true,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "flow.flowing",
+            "display": "Flowing well"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "flow.slow",
+            "display": "Slowly"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "flow.stagnant",
+            "display": "Not moving"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "flow.dry",
+            "display": "Dry"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "invasive",
+      "code": [
+        {
+          "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
+          "code": "invasive",
+          "display": "Did you see invasive plants or animals (e.g. water hyacinth)?"
+        }
+      ],
+      "text": "Did you see invasive plants or animals (e.g. water hyacinth)?",
+      "type": "choice",
+      "required": true,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "invasive.no",
+            "display": "No"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "invasive.unsure",
+            "display": "Not sure"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+            "code": "invasive.yes",
+            "display": "Yes"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "temperature",
+      "code": [
+        {
+          "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
+          "code": "temperature",
+          "display": "Water temperature (°C) — if you have a thermometer"
+        }
+      ],
+      "text": "Water temperature (°C) — if you have a thermometer",
+      "type": "decimal",
+      "required": false
+    },
+    {
+      "linkId": "ph",
+      "code": [
+        {
+          "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
+          "code": "ph",
+          "display": "pH — if you have a pH strip"
+        }
+      ],
+      "text": "pH — if you have a pH strip",
+      "type": "decimal",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,469 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "stream-answer",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Ranoka stream check answers (32 codes)</p></div>"
+  },
+  "url": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-answer",
+  "version": "1.0.0",
+  "name": "RanokaStreamAnswer",
+  "title": "Ranoka stream check answers",
+  "status": "active",
+  "experimental": false,
+  "publisher": "Ranoka",
+  "description": "Ranoka stream check answers. Defined by the Ranoka citizen stream check (OneAquaHealth IEEE Global Hackathon 2026).",
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 32,
+  "concept": [
+    {
+      "code": "colour.clear",
+      "display": "Clear",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Claire"
+        },
+        {
+          "language": "mg",
+          "value": "Mangarahara"
+        }
+      ]
+    },
+    {
+      "code": "colour.cloudy",
+      "display": "A bit cloudy",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Un peu trouble"
+        },
+        {
+          "language": "mg",
+          "value": "Manjavozavo kely"
+        }
+      ]
+    },
+    {
+      "code": "colour.brown",
+      "display": "Brown / muddy",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Marron / boueuse"
+        },
+        {
+          "language": "mg",
+          "value": "Feno fotaka / volontany"
+        }
+      ]
+    },
+    {
+      "code": "colour.green",
+      "display": "Green",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Verte"
+        },
+        {
+          "language": "mg",
+          "value": "Maitso"
+        }
+      ]
+    },
+    {
+      "code": "colour.unusual",
+      "display": "Unusual (milky, red, black…)",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Inhabituelle (laiteuse, rouge, noire…)"
+        },
+        {
+          "language": "mg",
+          "value": "Hafahafa (fotsy toy ny ronono, mena, mainty…)"
+        }
+      ]
+    },
+    {
+      "code": "smell.none",
+      "display": "No smell",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Aucune odeur"
+        },
+        {
+          "language": "mg",
+          "value": "Tsy misy fofona"
+        }
+      ]
+    },
+    {
+      "code": "smell.earthy",
+      "display": "Natural (earth, plants)",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Naturelle (terre, plantes)"
+        },
+        {
+          "language": "mg",
+          "value": "Voajanahary (tany, zavamaniry)"
+        }
+      ]
+    },
+    {
+      "code": "smell.sewage",
+      "display": "Rotten / sewage",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Pourri / égout"
+        },
+        {
+          "language": "mg",
+          "value": "Maimbo (lo / maloto)"
+        }
+      ]
+    },
+    {
+      "code": "smell.chemical",
+      "display": "Chemical / fuel",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Chimique / carburant"
+        },
+        {
+          "language": "mg",
+          "value": "Fofona simika / solika"
+        }
+      ]
+    },
+    {
+      "code": "foam.none",
+      "display": "No",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Non"
+        },
+        {
+          "language": "mg",
+          "value": "Tsia"
+        }
+      ]
+    },
+    {
+      "code": "foam.little",
+      "display": "A little, white",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Un peu, blanche"
+        },
+        {
+          "language": "mg",
+          "value": "Kely, fotsy"
+        }
+      ]
+    },
+    {
+      "code": "foam.lots",
+      "display": "A lot, it does not go away",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Beaucoup, elle ne disparaît pas"
+        },
+        {
+          "language": "mg",
+          "value": "Be dia be, tsy levona"
+        }
+      ]
+    },
+    {
+      "code": "oil.no",
+      "display": "No",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Non"
+        },
+        {
+          "language": "mg",
+          "value": "Tsia"
+        }
+      ]
+    },
+    {
+      "code": "oil.yes",
+      "display": "Yes",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Oui"
+        },
+        {
+          "language": "mg",
+          "value": "Eny"
+        }
+      ]
+    },
+    {
+      "code": "litter.none",
+      "display": "None",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Aucun"
+        },
+        {
+          "language": "mg",
+          "value": "Tsy misy"
+        }
+      ]
+    },
+    {
+      "code": "litter.some",
+      "display": "Some",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Quelques-uns"
+        },
+        {
+          "language": "mg",
+          "value": "Misy kely"
+        }
+      ]
+    },
+    {
+      "code": "litter.lots",
+      "display": "A lot",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Beaucoup"
+        },
+        {
+          "language": "mg",
+          "value": "Be dia be"
+        }
+      ]
+    },
+    {
+      "code": "deadAnimals.no",
+      "display": "No",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Non"
+        },
+        {
+          "language": "mg",
+          "value": "Tsia"
+        }
+      ]
+    },
+    {
+      "code": "deadAnimals.yes",
+      "display": "Yes",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Oui"
+        },
+        {
+          "language": "mg",
+          "value": "Eny"
+        }
+      ]
+    },
+    {
+      "code": "algae.none",
+      "display": "None",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Aucune"
+        },
+        {
+          "language": "mg",
+          "value": "Tsy misy"
+        }
+      ]
+    },
+    {
+      "code": "algae.some",
+      "display": "A little",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Un peu"
+        },
+        {
+          "language": "mg",
+          "value": "Kely"
+        }
+      ]
+    },
+    {
+      "code": "algae.mat",
+      "display": "A thick layer covering the water",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Une couche épaisse qui couvre l'eau"
+        },
+        {
+          "language": "mg",
+          "value": "Sosona matevina mandrakotra ny rano"
+        }
+      ]
+    },
+    {
+      "code": "banks.natural",
+      "display": "Many, natural",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Beaucoup, naturelles"
+        },
+        {
+          "language": "mg",
+          "value": "Maro sady voajanahary"
+        }
+      ]
+    },
+    {
+      "code": "banks.partial",
+      "display": "Some",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Quelques-unes"
+        },
+        {
+          "language": "mg",
+          "value": "Vitsivitsy"
+        }
+      ]
+    },
+    {
+      "code": "banks.bare",
+      "display": "None (bare soil or concrete)",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Aucune (terre nue ou béton)"
+        },
+        {
+          "language": "mg",
+          "value": "Tsy misy (tany mibaribary na beton)"
+        }
+      ]
+    },
+    {
+      "code": "flow.flowing",
+      "display": "Flowing well",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Elle coule bien"
+        },
+        {
+          "language": "mg",
+          "value": "Mikoriana tsara"
+        }
+      ]
+    },
+    {
+      "code": "flow.slow",
+      "display": "Slowly",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Lentement"
+        },
+        {
+          "language": "mg",
+          "value": "Miadana"
+        }
+      ]
+    },
+    {
+      "code": "flow.stagnant",
+      "display": "Not moving",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Elle ne bouge pas"
+        },
+        {
+          "language": "mg",
+          "value": "Tsy mihetsika"
+        }
+      ]
+    },
+    {
+      "code": "flow.dry",
+      "display": "Dry",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "À sec"
+        },
+        {
+          "language": "mg",
+          "value": "Ritra"
+        }
+      ]
+    },
+    {
+      "code": "invasive.no",
+      "display": "No",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Non"
+        },
+        {
+          "language": "mg",
+          "value": "Tsia"
+        }
+      ]
+    },
+    {
+      "code": "invasive.unsure",
+      "display": "Not sure",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Je ne sais pas"
+        },
+        {
+          "language": "mg",
+          "value": "Tsy azoko antoka"
+        }
+      ]
+    },
+    {
+      "code": "invasive.yes",
+      "display": "Yes",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Oui"
+        },
+        {
+          "language": "mg",
+          "value": "Eny"
+        }
+      ]
+    }
+  ]
+}
