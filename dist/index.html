@@ -302,12 +302,95 @@ footer { max-width: 640px; margin: 0 auto; padding: 8px 16px 32px; color: var(--
     });
   }
 
+  /** i18n module (browser global or Node require), used for canonical English displays. */
+  function i18n() {
+    if (root.RanokaI18n) return root.RanokaI18n;
+    if (typeof module !== "undefined" && typeof require === "function") {
+      try { return require("./i18n.js"); } catch (e) { return null; }
+    }
+    return null;
+  }
+
+  /** Coding.display must match the CodeSystem display (English); localized text goes in .text. */
+  function canonicalT(fallback) {
+    const I = i18n();
+    return I ? I.translator("en") : fallback;
+  }
+
+  function designations(key) {
+    const I = i18n();
+    if (!I) return undefined;
+    const out = [];
+    for (const lang of ["fr", "mg"]) {
+      const v = I.STRINGS[lang] && I.STRINGS[lang][key];
+      if (v) out.push({ language: lang, value: v });
+    }
+    return out.length ? out : undefined;
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  /** Human-readable narrative (FHIR dom-6 best practice). */
+  function narrative(lines) {
+    return {
+      status: "generated",
+      div: '<div xmlns="http://www.w3.org/1999/xhtml">' + lines.map((l) => "<p>" + esc(l) + "</p>").join("") + "</div>",
+    };
+  }
+
+  /**
+   * FHIR R4 CodeSystems for the indicators and answers, generated from QUESTIONS
+   * so the terminology, the form and the export never drift apart.
+   */
+  function fhirCodeSystems(t) {
+    t = t || ((k) => k);
+    const concept = (code, key) => {
+      const c = { code, display: t(key) };
+      const d = designations(key);
+      if (d) c.designation = d;
+      return c;
+    };
+    const indicators = QUESTIONS.map((q) => concept(q.id, "q." + q.id));
+    indicators.push({ code: "stream-health-index", display: "Stream health index (0-100)" });
+    const answers = [];
+    for (const q of QUESTIONS) {
+      if (q.type !== "choice") continue;
+      for (const o of q.options) answers.push(concept(q.id + "." + o.code, "a." + q.id + "." + o.code));
+    }
+    const cs = (id, name, title, url, concepts) => ({
+      resourceType: "CodeSystem",
+      id,
+      text: narrative([title + " (" + concepts.length + " codes)"]),
+      url,
+      version: "1.0.0",
+      name,
+      title,
+      status: "active",
+      experimental: false,
+      publisher: "Ranoka",
+      description: title + ". Defined by the Ranoka citizen stream check (OneAquaHealth IEEE Global Hackathon 2026).",
+      caseSensitive: true,
+      content: "complete",
+      count: concepts.length,
+      concept: concepts,
+    });
+    return [
+      cs("stream-indicator", "RanokaStreamIndicator", "Ranoka stream indicators", INDICATOR_SYSTEM, indicators),
+      cs("stream-answer", "RanokaStreamAnswer", "Ranoka stream check answers", ANSWER_SYSTEM, answers),
+    ];
+  }
+
   /** FHIR R4 Questionnaire resource generated from QUESTIONS. */
   function fhirQuestionnaire(t) {
     t = t || ((k) => k);
+    const tc = canonicalT(t);
     return {
       resourceType: "Questionnaire",
       id: "ranoka-stream-check",
+      text: narrative(["Ranoka citizen stream check: " + QUESTIONS.length + " questions (" +
+        QUESTIONS.filter((q) => q.optional).length + " optional)."]),
       url: QUESTIONNAIRE_URL,
       version: "1.0.0",
       name: "RanokaStreamCheck",
@@ -317,14 +400,14 @@ footer { max-width: 640px; margin: 0 auto; padding: 8px 16px 32px; color: var(--
       item: QUESTIONS.map((q) => {
         const item = {
           linkId: q.id,
-          code: [{ system: INDICATOR_SYSTEM, code: q.id }],
+          code: [{ system: INDICATOR_SYSTEM, code: q.id, display: tc("q." + q.id) }],
           text: t("q." + q.id),
           type: q.type === "choice" ? "choice" : "decimal",
           required: !q.optional,
         };
         if (q.type === "choice") {
           item.answerOption = q.options.map((o) => ({
-            valueCoding: { system: ANSWER_SYSTEM, code: q.id + "." + o.code, display: t("a." + q.id + "." + o.code) },
+            valueCoding: { system: ANSWER_SYSTEM, code: q.id + "." + o.code, display: tc("a." + q.id + "." + o.code) },
           }));
         }
         return item;
@@ -339,6 +422,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 8px 16px 32px; color: var(--
    */
   function fhirBundle(record, t) {
     t = t || ((k) => k);
+    const tc = canonicalT(t);
     const { answers, meta } = record;
     const result = score(answers);
     const q = quality(answers, meta);
@@ -360,6 +444,8 @@ footer { max-width: 640px; margin: 0 auto; padding: 8px 16px 32px; color: var(--
     if (typeof meta.latitude === "number" && typeof meta.longitude === "number") {
       location.position = { latitude: meta.latitude, longitude: meta.longitude };
     }
+    location.text = narrative(["Stream site: " + location.name +
+      (location.position ? " (" + location.position.latitude + ", " + location.position.longitude + ")" : "")]);
     entries.push({ id: locId, resource: location });
 
     const qr = {
@@ -371,6 +457,8 @@ footer { max-width: 640px; margin: 0 auto; padding: 8px 16px 32px; color: var(--
       item: [],
     };
     if (meta.observer) qr.author = { display: meta.observer };
+    // Citizen observers are not Practitioners: record them by display only.
+    const performer = [{ display: meta.observer ? meta.observer + " (citizen observer)" : "Citizen observer" }];
     const obsIds = [];
     for (const def of QUESTIONS) {
       const v = answers[def.id];
@@ -378,15 +466,17 @@ footer { max-width: 640px; margin: 0 auto; padding: 8px 16px 32px; color: var(--
       let answer;
       let obsValue;
       if (def.type === "choice") {
-        const coding = { system: ANSWER_SYSTEM, code: def.id + "." + v, display: t("a." + def.id + "." + v) };
+        const coding = { system: ANSWER_SYSTEM, code: def.id + "." + v, display: tc("a." + def.id + "." + v) };
         answer = { valueCoding: coding };
-        obsValue = { valueCodeableConcept: { coding: [coding], text: coding.display } };
+        obsValue = { valueCodeableConcept: { coding: [coding], text: t("a." + def.id + "." + v) } };
       } else {
         const n = Number(v);
         answer = { valueDecimal: n };
         obsValue = { valueQuantity: { value: n, unit: def.unit === "Cel" ? "°C" : "pH", system: UCUM, code: def.unit } };
       }
-      qr.item.push({ linkId: def.id, text: t("q." + def.id), answer: [answer] });
+      // item.text must match the published (English) Questionnaire; the localized wording is in Observation.code.text.
+      qr.item.push({ linkId: def.id, text: tc("q." + def.id), answer: [answer] });
+      const shown = def.type === "choice" ? t("a." + def.id + "." + v) : Number(v) + " " + (def.unit === "Cel" ? "°C" : "pH");
       const obsId = uuid();
       obsIds.push(obsId);
       entries.push({
@@ -395,13 +485,18 @@ footer { max-width: 640px; margin: 0 auto; padding: 8px 16px 32px; color: var(--
           resourceType: "Observation",
           status: "final",
           category: [{ coding: [{ system: "http://terminology.hl7.org/CodeSystem/observation-category", code: "survey", display: "Survey" }] }],
-          code: { coding: [{ system: INDICATOR_SYSTEM, code: def.id, display: t("q." + def.id) }], text: t("q." + def.id) },
+          text: narrative([t("q." + def.id) + " " + shown]),
+          code: { coding: [{ system: INDICATOR_SYSTEM, code: def.id, display: tc("q." + def.id) }], text: t("q." + def.id) },
           subject: ref(locId),
           effectiveDateTime: authored,
+          performer,
           derivedFrom: [ref(qrId)],
         }, obsValue),
       });
     }
+    const answered = new Set(qr.item.map((i) => i.linkId));
+    qr.status = QUESTIONS.every((d) => d.optional || answered.has(d.id)) ? "completed" : "in-progress";
+    qr.text = narrative(["Citizen stream check at " + location.name + ", " + authored + ": " + qr.item.length + " answers."]);
     entries.splice(1, 0, { id: qrId, resource: qr });
 
     const interpretationCode = { good: "N", moderate: "IND", poor: "A", alert: "AA" }[result.level];
@@ -412,7 +507,8 @@ footer { max-width: 640px; margin: 0 auto; padding: 8px 16px 32px; color: var(--
       code: { coding: [{ system: INDICATOR_SYSTEM, code: "stream-health-index", display: "Stream health index (0-100)" }], text: "Stream health index" },
       subject: ref(locId),
       effectiveDateTime: authored,
-      valueQuantity: { value: result.index, unit: "score", system: UCUM, code: "{score}" },
+      performer,
+      valueInteger: result.index,
       interpretation: [{
         coding: [{ system: "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", code: interpretationCode }],
         text: result.level,
@@ -426,6 +522,11 @@ footer { max-width: 640px; margin: 0 auto; padding: 8px 16px 32px; color: var(--
       derivedFrom: [ref(qrId)],
       hasMember: obsIds.map(ref),
     };
+    summary.text = narrative([
+      "Stream health index: " + result.index + "/100 (" + result.level + ")",
+      summary.note[0].text,
+      summary.note[1].text,
+    ]);
     entries.push({ id: uuid(), resource: summary });
 
     return {
@@ -467,7 +568,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 8px 16px 32px; color: var(--
     return errors;
   }
 
-  const api = { QUESTIONS, MAX_PENALTY, score, quality, advice, fhirQuestionnaire, fhirBundle, validateBundle, QUESTIONNAIRE_URL };
+  const api = { QUESTIONS, MAX_PENALTY, score, quality, advice, fhirQuestionnaire, fhirCodeSystems, fhirBundle, validateBundle, QUESTIONNAIRE_URL };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.RanokaCore = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);

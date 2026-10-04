@@ -1,6 +1,10 @@
 {
   "resourceType": "Questionnaire",
   "id": "ranoka-stream-check",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Ranoka citizen stream check: 12 questions (2 optional).</p></div>"
+  },
   "url": "https://nambininasafidison.github.io/ranoka/fhir/Questionnaire/ranoka-stream-check",
   "version": "1.0.0",
   "name": "RanokaStreamCheck",
@@ -15,7 +19,8 @@
       "code": [
         {
           "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
-          "code": "colour"
+          "code": "colour",
+          "display": "What colour is the water?"
         }
       ],
       "text": "What colour is the water?",
@@ -64,7 +69,8 @@
       "code": [
         {
           "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
-          "code": "smell"
+          "code": "smell",
+          "display": "How does it smell?"
         }
       ],
       "text": "How does it smell?",
@@ -106,7 +112,8 @@
       "code": [
         {
           "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
-          "code": "foam"
+          "code": "foam",
+          "display": "Is there foam on the water?"
         }
       ],
       "text": "Is there foam on the water?",
@@ -141,7 +148,8 @@
       "code": [
         {
           "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
-          "code": "oil"
+          "code": "oil",
+          "display": "Is there a shiny, rainbow film (oil) on the surface?"
         }
       ],
       "text": "Is there a shiny, rainbow film (oil) on the surface?",
@@ -169,7 +177,8 @@
       "code": [
         {
           "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
-          "code": "litter"
+          "code": "litter",
+          "display": "Is there litter in or near the water?"
         }
       ],
       "text": "Is there litter in or near the water?",
@@ -204,7 +213,8 @@
       "code": [
         {
           "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
-          "code": "deadAnimals"
+          "code": "deadAnimals",
+          "display": "Do you see dead fish or animals?"
         }
       ],
       "text": "Do you see dead fish or animals?",
@@ -232,7 +242,8 @@
       "code": [
         {
           "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
-          "code": "algae"
+          "code": "algae",
+          "display": "Green slime or algae on the water?"
         }
       ],
       "text": "Green slime or algae on the water?",
@@ -267,7 +278,8 @@
       "code": [
         {
           "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
-          "code": "banks"
+          "code": "banks",
+          "display": "Plants along the banks?"
         }
       ],
       "text": "Plants along the banks?",
@@ -302,7 +314,8 @@
       "code": [
         {
           "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
-          "code": "flow"
+          "code": "flow",
+          "display": "How is the water moving?"
         }
       ],
       "text": "How is the water moving?",
@@ -344,7 +357,8 @@
       "code": [
         {
           "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
-          "code": "invasive"
+          "code": "invasive",
+          "display": "Did you see invasive plants or animals (e.g. water hyacinth)?"
         }
       ],
       "text": "Did you see invasive plants or animals (e.g. water hyacinth)?",
@@ -379,7 +393,8 @@
       "code": [
         {
           "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
-          "code": "temperature"
+          "code": "temperature",
+          "display": "Water temperature (°C) — if you have a thermometer"
         }
       ],
       "text": "Water temperature (°C) — if you have a thermometer",
@@ -391,7 +406,8 @@
       "code": [
         {
           "system": "https://nambininasafidison.github.io/ranoka/fhir/CodeSystem/stream-indicator",
-          "code": "ph"
+          "code": "ph",
+          "display": "pH — if you have a pH strip"
         }
       ],
       "text": "pH — if you have a pH strip",

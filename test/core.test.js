@@ -106,3 +106,59 @@ test("all three languages translate every key", () => {
     if (q.options) for (const o of q.options) assert.ok(STRINGS.en["a." + q.id + "." + o.code]);
   }
 });
+
+// --- Interoperability checks added after running the official HL7 FHIR validator (0 errors) ---
+
+const full = { ...clean, colour: "green", smell: "chemical", temperature: 31, ph: 6.2 };
+const meta = { siteName: "Ikopa", latitude: -18.9, longitude: 47.5, authored: "2026-10-04T10:00:00Z", observer: "Rakoto" };
+
+test("every resource carries a generated narrative (dom-6)", () => {
+  const b = core.fhirBundle({ answers: full, meta }, translator("en"));
+  for (const e of b.entry) {
+    assert.strictEqual(e.resource.text.status, "generated");
+    assert.match(e.resource.text.div, /^<div xmlns="http:\/\/www\.w3\.org\/1999\/xhtml">/);
+  }
+  assert.ok(core.fhirQuestionnaire(translator("en")).text);
+  for (const cs of core.fhirCodeSystems(translator("en"))) assert.ok(cs.text);
+});
+
+test("codings keep the canonical English display in every language; the localized wording goes in .text", () => {
+  const en = core.fhirBundle({ answers: full, meta }, translator("en"));
+  for (const lang of ["fr", "mg"]) {
+    const other = core.fhirBundle({ answers: full, meta }, translator(lang));
+    const codings = (b) => b.entry.filter((e) => e.resource.resourceType === "Observation")
+      .map((e) => e.resource.code.coding[0].display + "|" + (e.resource.valueCodeableConcept ? e.resource.valueCodeableConcept.coding[0].display : ""));
+    assert.deepStrictEqual(codings(other), codings(en), lang);
+    const obs = other.entry.find((e) => e.resource.code && e.resource.code.coding[0].code === "colour").resource;
+    assert.strictEqual(obs.valueCodeableConcept.text, STRINGS[lang]["a.colour.green"]);
+  }
+});
+
+test("published CodeSystems define every code the export uses, with FR and MG designations", () => {
+  const [indicators, answers] = core.fhirCodeSystems(translator("en"));
+  const codes = (cs) => new Set(cs.concept.map((c) => c.code));
+  const ind = codes(indicators);
+  const ans = codes(answers);
+  const b = core.fhirBundle({ answers: full, meta }, translator("en"));
+  for (const e of b.entry) {
+    const r = e.resource;
+    if (r.resourceType !== "Observation") continue;
+    assert.ok(ind.has(r.code.coding[0].code), r.code.coding[0].code);
+    if (r.valueCodeableConcept) assert.ok(ans.has(r.valueCodeableConcept.coding[0].code));
+  }
+  for (const c of answers.concept) {
+    assert.deepStrictEqual(c.designation.map((d) => d.language), ["fr", "mg"], c.code);
+  }
+  assert.strictEqual(answers.count, answers.concept.length);
+});
+
+test("observations record the citizen observer; incomplete checks are 'in-progress'", () => {
+  const b = core.fhirBundle({ answers: full, meta }, translator("en"));
+  const obs = b.entry.filter((e) => e.resource.resourceType === "Observation");
+  for (const e of obs) assert.strictEqual(e.resource.performer[0].display, "Rakoto (citizen observer)");
+  assert.strictEqual(b.entry[1].resource.status, "completed");
+  const partial = core.fhirBundle({ answers: { colour: "clear" }, meta: {} }, translator("en"));
+  assert.strictEqual(partial.entry[1].resource.status, "in-progress");
+  const summary = b.entry[b.entry.length - 1].resource;
+  assert.ok(Number.isInteger(summary.valueInteger));
+});
