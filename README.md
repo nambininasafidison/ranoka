@@ -13,6 +13,14 @@ Anyone can stand next to an urban stream and answer 10 visual questions in about
 
 It runs **offline**, in **English, French and Malagasy**, and keeps data **only on the device** until the user exports it. This matters for citizen scientists in the Global South, where connectivity and language are the first barriers.
 
+![Explained result](docs/screenshots/3-result.png)
+
+| | |
+|---|---|
+| ![Multilingual](docs/screenshots/1-multilingual.png) | ![Question](docs/screenshots/2-question.png) |
+| ![Advice](docs/screenshots/4-advice.png) | ![Data quality](docs/screenshots/5-data-quality.png) |
+| ![FHIR](docs/screenshots/6-fhir.png) | ![History](docs/screenshots/7-history.png) |
+
 ## Try it
 
 - Open `dist/index.html` in any browser (one self-contained file, no server, no install).
