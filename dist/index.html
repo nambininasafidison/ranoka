@@ -1,0 +1,1134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b6e79">
+<title>Ranoka Stream Check</title>
+<meta name="description" content="Ranoka: a 60-second citizen stream check with explained One Health results and HL7 FHIR R4 export.">
+<style>
+:root {
+  --bg: #f4f8f8; --card: #ffffff; --ink: #14262b; --muted: #5a6e73; --line: #d8e3e5;
+  --brand: #0b6e79; --brand-ink: #ffffff; --sel: #e2f3f4;
+  --good: #1f8a4c; --moderate: #b88a00; --poor: #d0641a; --alert: #c62828;
+  --alert-bg: #fdecec;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1719; --card: #162326; --ink: #e5eff0; --muted: #9db2b6; --line: #2a3b3f;
+    --brand: #3fb6c2; --brand-ink: #062226; --sel: #1d3a3e;
+    --good: #4cc982; --moderate: #e2b72e; --poor: #f08a45; --alert: #ff6b6b; --alert-bg: #3a1c1c;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1719; --card: #162326; --ink: #e5eff0; --muted: #9db2b6; --line: #2a3b3f;
+  --brand: #3fb6c2; --brand-ink: #062226; --sel: #1d3a3e;
+  --good: #4cc982; --moderate: #e2b72e; --poor: #f08a45; --alert: #ff6b6b; --alert-bg: #3a1c1c;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { max-width: 640px; margin: 0 auto; padding: 16px 16px 0; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+h1 { margin: 0; font-size: 1.5rem; color: var(--brand); letter-spacing: .02em; }
+h1 span { font-size: 1.6rem; }
+#tagline { margin: 4px 0 12px; color: var(--muted); font-size: .95rem; }
+#langs { display: flex; gap: 4px; }
+.lang { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 8px; padding: 4px 8px; font-weight: 600; cursor: pointer; }
+.lang.active { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+#nav { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tab { background: none; border: 0; padding: 10px 12px; color: var(--muted); font-size: .95rem; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
+.tab.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 600; }
+main { max-width: 640px; margin: 0 auto; padding: 16px; outline: none; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+h2 { margin: 8px 0 16px; font-size: 1.3rem; }
+h3 { margin: 20px 0 8px; font-size: 1.05rem; }
+label { display: block; margin: 12px 0 4px; font-weight: 600; font-size: .9rem; }
+input { width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 1rem; background: var(--bg); color: var(--ink); }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.muted { color: var(--muted); font-size: .9rem; margin: 6px 0; }
+button { font: inherit; cursor: pointer; }
+.primary, .secondary, .danger { border-radius: 10px; padding: 12px 16px; font-weight: 600; border: 1px solid var(--brand); }
+.primary { background: var(--brand); color: var(--brand-ink); }
+.primary:disabled { opacity: .5; cursor: default; }
+.secondary { background: transparent; color: var(--brand); margin-top: 12px; }
+.danger { background: transparent; color: var(--alert); border-color: var(--alert); margin-top: 12px; }
+.actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 20px; }
+.actions.wrap { flex-wrap: wrap; justify-content: flex-start; }
+.actions .secondary { margin-top: 0; }
+.choices { display: grid; gap: 10px; }
+.choice { text-align: left; padding: 16px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); font-size: 1.05rem; min-height: 56px; }
+.choice:hover { border-color: var(--brand); }
+.choice.selected { border-color: var(--brand); background: var(--sel); font-weight: 600; }
+.progress { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.progress .bar { height: 100%; background: var(--brand); transition: width .2s; }
+.score { display: flex; align-items: center; gap: 20px; }
+.gauge { width: 120px; height: 120px; flex: none; }
+.gauge circle { fill: none; stroke-width: 12; }
+.gauge .track { stroke: var(--line); }
+.gauge .value { stroke-linecap: round; transition: stroke-dashoffset .6s; }
+.gauge .num { font-size: 30px; font-weight: 700; fill: var(--ink); }
+.gauge.lvl-good .value { stroke: var(--good); } .gauge.lvl-moderate .value { stroke: var(--moderate); }
+.gauge.lvl-poor .value { stroke: var(--poor); } .gauge.lvl-alert .value { stroke: var(--alert); }
+.badge { display: inline-block; padding: 6px 14px; border-radius: 999px; font-weight: 700; color: #fff; font-size: 1.1rem; }
+.badge.small { font-size: .85rem; padding: 2px 10px; min-width: 42px; text-align: center; }
+.lvl-good.badge { background: var(--good); } .lvl-moderate.badge { background: var(--moderate); }
+.lvl-poor.badge { background: var(--poor); } .lvl-alert.badge { background: var(--alert); }
+.alert { margin-top: 16px; padding: 12px 16px; border-radius: 12px; background: var(--alert-bg); border-left: 4px solid var(--alert); }
+.alert ul { margin: 6px 0 0; padding-left: 20px; }
+ul.factors, ul.advice, ul.issues, ul.hist { list-style: none; padding: 0; margin: 0; }
+.factors li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.factors .pen { color: var(--poor); font-weight: 700; white-space: nowrap; }
+.advice li { padding: 10px 12px; margin-bottom: 8px; border-radius: 10px; background: var(--sel); }
+.issues li { padding: 6px 0; }
+.issues li.error::before { content: "✖ "; color: var(--alert); }
+.issues li.warning::before { content: "! "; color: var(--moderate); font-weight: 700; }
+.conf-high { color: var(--good); } .conf-medium { color: var(--moderate); } .conf-low { color: var(--alert); }
+.site { border-top: 1px solid var(--line); padding-top: 8px; }
+.hist li { display: flex; gap: 12px; align-items: center; padding: 6px 0; flex-wrap: wrap; }
+.spark { width: 100%; max-width: 240px; height: 48px; }
+.spark polyline { fill: none; stroke: var(--brand); stroke-width: 2.5; stroke-linejoin: round; }
+footer { max-width: 640px; margin: 0 auto; padding: 8px 16px 32px; color: var(--muted); font-size: .8rem; }
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <h1><span aria-hidden="true">💧</span> Ranoka</h1>
+    <div id="langs" aria-label="Language"></div>
+  </div>
+  <p id="tagline"></p>
+  <nav id="nav"></nav>
+</header>
+<main id="main" tabindex="-1"></main>
+<footer>OneAquaHealth IEEE Global Hackathon 2026 · HL7 FHIR R4 · works offline · data stays on your device</footer>
+<script>
+/*
+ * Ranoka core: questionnaire definition, explainable stream-health scoring,
+ * data-quality checks and HL7 FHIR R4 export.
+ * Works in the browser (window.RanokaCore) and in Node (module.exports).
+ */
+(function (root) {
+  "use strict";
+
+  const CANONICAL = "https://nambininasafidison.github.io/ranoka/fhir";
+  const QUESTIONNAIRE_URL = CANONICAL + "/Questionnaire/ranoka-stream-check";
+  const INDICATOR_SYSTEM = CANONICAL + "/CodeSystem/stream-indicator";
+  const ANSWER_SYSTEM = CANONICAL + "/CodeSystem/stream-answer";
+  const UCUM = "http://unitsofmeasure.org";
+
+  // Each choice carries a penalty. "critical" choices trigger an immediate
+  // One Health warning whatever the overall score is.
+  const QUESTIONS = [
+    { id: "colour", type: "choice", options: [
+      { code: "clear", penalty: 0 },
+      { code: "cloudy", penalty: 1 },
+      { code: "brown", penalty: 2 },
+      { code: "green", penalty: 2 },
+      { code: "unusual", penalty: 3 },
+    ] },
+    { id: "smell", type: "choice", options: [
+      { code: "none", penalty: 0 },
+      { code: "earthy", penalty: 0 },
+      { code: "sewage", penalty: 3, critical: true },
+      { code: "chemical", penalty: 3, critical: true },
+    ] },
+    { id: "foam", type: "choice", options: [
+      { code: "none", penalty: 0 },
+      { code: "little", penalty: 1 },
+      { code: "lots", penalty: 2 },
+    ] },
+    { id: "oil", type: "choice", options: [
+      { code: "no", penalty: 0 },
+      { code: "yes", penalty: 3, critical: true },
+    ] },
+    { id: "litter", type: "choice", options: [
+      { code: "none", penalty: 0 },
+      { code: "some", penalty: 1 },
+      { code: "lots", penalty: 2 },
+    ] },
+    { id: "deadAnimals", type: "choice", options: [
+      { code: "no", penalty: 0 },
+      { code: "yes", penalty: 4, critical: true },
+    ] },
+    { id: "algae", type: "choice", options: [
+      { code: "none", penalty: 0 },
+      { code: "some", penalty: 1 },
+      { code: "mat", penalty: 3, critical: true },
+    ] },
+    { id: "banks", type: "choice", options: [
+      { code: "natural", penalty: 0 },
+      { code: "partial", penalty: 1 },
+      { code: "bare", penalty: 2 },
+    ] },
+    { id: "flow", type: "choice", options: [
+      { code: "flowing", penalty: 0 },
+      { code: "slow", penalty: 1 },
+      { code: "stagnant", penalty: 2 },
+      { code: "dry", penalty: 2 },
+    ] },
+    { id: "invasive", type: "choice", options: [
+      { code: "no", penalty: 0 },
+      { code: "unsure", penalty: 0 },
+      { code: "yes", penalty: 1 },
+    ] },
+    { id: "temperature", type: "decimal", optional: true, unit: "Cel", min: 0, max: 40 },
+    { id: "ph", type: "decimal", optional: true, unit: "[pH]", min: 3, max: 11 },
+  ];
+
+  const MAX_PENALTY = QUESTIONS.reduce((sum, q) => {
+    if (q.type === "choice") return sum + Math.max(...q.options.map((o) => o.penalty));
+    return sum + 2; // numeric indicators contribute at most 2
+  }, 0);
+
+  function question(id) {
+    return QUESTIONS.find((q) => q.id === id);
+  }
+
+  function numericPenalty(id, value) {
+    if (value === null || value === undefined || Number.isNaN(value)) return 0;
+    if (id === "temperature") {
+      if (value > 30) return 2;
+      if (value > 25) return 1;
+      return 0;
+    }
+    if (id === "ph") {
+      if (value < 6 || value > 9) return 2;
+      if (value < 6.5 || value > 8.5) return 1;
+      return 0;
+    }
+    return 0;
+  }
+
+  /**
+   * Score an observation. Returns { index, level, factors, critical, advice }.
+   * index: 0 (very poor) .. 100 (good). factors explain every point lost.
+   */
+  function score(answers) {
+    const factors = [];
+    const critical = [];
+    let penalty = 0;
+    for (const q of QUESTIONS) {
+      const value = answers[q.id];
+      if (value === undefined || value === null || value === "") continue;
+      if (q.type === "choice") {
+        const opt = q.options.find((o) => o.code === value);
+        if (!opt) continue;
+        if (opt.penalty > 0) factors.push({ question: q.id, answer: value, penalty: opt.penalty });
+        if (opt.critical) critical.push({ question: q.id, answer: value });
+        penalty += opt.penalty;
+      } else {
+        const p = numericPenalty(q.id, Number(value));
+        if (p > 0) factors.push({ question: q.id, answer: Number(value), penalty: p });
+        penalty += p;
+      }
+    }
+    const index = Math.max(0, Math.round(100 - (100 * penalty) / MAX_PENALTY));
+    let level;
+    if (critical.length > 0 || index < 40) level = "alert";
+    else if (index < 60) level = "poor";
+    else if (index < 80) level = "moderate";
+    else level = "good";
+    factors.sort((a, b) => b.penalty - a.penalty);
+    return { index, level, penalty, maxPenalty: MAX_PENALTY, factors, critical, advice: advice(level, answers) };
+  }
+
+  /** One Health advice keys: people, animals, environment. */
+  function advice(level, answers) {
+    const out = [];
+    if (level === "alert") {
+      out.push("people.avoid", "animals.keepAway", "env.report");
+    } else if (level === "poor") {
+      out.push("people.washHands", "animals.noDrink", "env.report");
+    } else if (level === "moderate") {
+      out.push("people.washHands", "env.monitor");
+    } else {
+      out.push("people.ok", "env.monitor");
+    }
+    if (answers.algae === "mat") out.push("animals.algaeToxic");
+    if (answers.litter === "lots") out.push("env.cleanup");
+    if (answers.invasive === "yes") out.push("env.invasive");
+    return Array.from(new Set(out));
+  }
+
+  /**
+   * Data-quality checks before data reaches scientists.
+   * Returns { confidence: "high"|"medium"|"low", issues: [{code, severity}] }.
+   */
+  function quality(answers, meta) {
+    const issues = [];
+    meta = meta || {};
+    for (const q of QUESTIONS) {
+      if (q.optional) continue;
+      if (!answers[q.id]) issues.push({ code: "missing." + q.id, severity: "error" });
+    }
+    for (const id of ["temperature", "ph"]) {
+      const v = answers[id];
+      if (v === undefined || v === null || v === "") continue;
+      const q = question(id);
+      const n = Number(v);
+      if (Number.isNaN(n) || n < q.min || n > q.max) issues.push({ code: "range." + id, severity: "error" });
+    }
+    if (answers.flow === "dry") {
+      for (const id of ["foam", "oil", "algae"]) {
+        const v = answers[id];
+        if (v && v !== "none" && v !== "no") issues.push({ code: "inconsistent.dryWater", severity: "warning" });
+      }
+    }
+    if (answers.colour === "clear" && answers.algae === "mat") {
+      issues.push({ code: "inconsistent.clearAlgae", severity: "warning" });
+    }
+    if (!meta.latitude && meta.latitude !== 0) issues.push({ code: "missing.location", severity: "warning" });
+    if (meta.accuracy && meta.accuracy > 200) issues.push({ code: "location.imprecise", severity: "warning" });
+    if (meta.authored && new Date(meta.authored).getTime() > Date.now() + 5 * 60 * 1000) {
+      issues.push({ code: "time.future", severity: "error" });
+    }
+    const unique = [];
+    const seen = new Set();
+    for (const i of issues) {
+      if (!seen.has(i.code)) { seen.add(i.code); unique.push(i); }
+    }
+    const errors = unique.filter((i) => i.severity === "error").length;
+    const warnings = unique.length - errors;
+    const confidence = errors > 0 ? "low" : warnings > 1 ? "medium" : warnings === 1 ? "medium" : "high";
+    return { confidence, issues: unique };
+  }
+
+  function uuid() {
+    if (root.crypto && root.crypto.randomUUID) return root.crypto.randomUUID();
+    // RFC 4122 v4 fallback
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+    });
+  }
+
+  /** FHIR R4 Questionnaire resource generated from QUESTIONS. */
+  function fhirQuestionnaire(t) {
+    t = t || ((k) => k);
+    return {
+      resourceType: "Questionnaire",
+      id: "ranoka-stream-check",
+      url: QUESTIONNAIRE_URL,
+      version: "1.0.0",
+      name: "RanokaStreamCheck",
+      title: "Ranoka citizen stream check",
+      status: "active",
+      subjectType: ["Location"],
+      item: QUESTIONS.map((q) => {
+        const item = {
+          linkId: q.id,
+          code: [{ system: INDICATOR_SYSTEM, code: q.id }],
+          text: t("q." + q.id),
+          type: q.type === "choice" ? "choice" : "decimal",
+          required: !q.optional,
+        };
+        if (q.type === "choice") {
+          item.answerOption = q.options.map((o) => ({
+            valueCoding: { system: ANSWER_SYSTEM, code: q.id + "." + o.code, display: t("a." + q.id + "." + o.code) },
+          }));
+        }
+        return item;
+      }),
+    };
+  }
+
+  /**
+   * Build a FHIR R4 transaction Bundle for one stream check:
+   * Location + QuestionnaireResponse + one Observation per indicator
+   * + a summary Observation (stream health index) derived from them.
+   */
+  function fhirBundle(record, t) {
+    t = t || ((k) => k);
+    const { answers, meta } = record;
+    const result = score(answers);
+    const q = quality(answers, meta);
+    const authored = meta.authored || new Date().toISOString();
+    const locId = uuid();
+    const qrId = uuid();
+    const entries = [];
+    const ref = (id) => ({ reference: "urn:uuid:" + id });
+
+    const location = {
+      resourceType: "Location",
+      status: "active",
+      name: meta.siteName || "Stream site",
+      mode: "instance",
+      physicalType: {
+        coding: [{ system: "http://terminology.hl7.org/CodeSystem/location-physical-type", code: "area", display: "Area" }],
+      },
+    };
+    if (typeof meta.latitude === "number" && typeof meta.longitude === "number") {
+      location.position = { latitude: meta.latitude, longitude: meta.longitude };
+    }
+    entries.push({ id: locId, resource: location });
+
+    const qr = {
+      resourceType: "QuestionnaireResponse",
+      questionnaire: QUESTIONNAIRE_URL,
+      status: "completed",
+      subject: ref(locId),
+      authored,
+      item: [],
+    };
+    if (meta.observer) qr.author = { display: meta.observer };
+    const obsIds = [];
+    for (const def of QUESTIONS) {
+      const v = answers[def.id];
+      if (v === undefined || v === null || v === "") continue;
+      let answer;
+      let obsValue;
+      if (def.type === "choice") {
+        const coding = { system: ANSWER_SYSTEM, code: def.id + "." + v, display: t("a." + def.id + "." + v) };
+        answer = { valueCoding: coding };
+        obsValue = { valueCodeableConcept: { coding: [coding], text: coding.display } };
+      } else {
+        const n = Number(v);
+        answer = { valueDecimal: n };
+        obsValue = { valueQuantity: { value: n, unit: def.unit === "Cel" ? "°C" : "pH", system: UCUM, code: def.unit } };
+      }
+      qr.item.push({ linkId: def.id, text: t("q." + def.id), answer: [answer] });
+      const obsId = uuid();
+      obsIds.push(obsId);
+      entries.push({
+        id: obsId,
+        resource: Object.assign({
+          resourceType: "Observation",
+          status: "final",
+          category: [{ coding: [{ system: "http://terminology.hl7.org/CodeSystem/observation-category", code: "survey", display: "Survey" }] }],
+          code: { coding: [{ system: INDICATOR_SYSTEM, code: def.id, display: t("q." + def.id) }], text: t("q." + def.id) },
+          subject: ref(locId),
+          effectiveDateTime: authored,
+          derivedFrom: [ref(qrId)],
+        }, obsValue),
+      });
+    }
+    entries.splice(1, 0, { id: qrId, resource: qr });
+
+    const interpretationCode = { good: "N", moderate: "IND", poor: "A", alert: "AA" }[result.level];
+    const summary = {
+      resourceType: "Observation",
+      status: "final",
+      category: [{ coding: [{ system: "http://terminology.hl7.org/CodeSystem/observation-category", code: "survey", display: "Survey" }] }],
+      code: { coding: [{ system: INDICATOR_SYSTEM, code: "stream-health-index", display: "Stream health index (0-100)" }], text: "Stream health index" },
+      subject: ref(locId),
+      effectiveDateTime: authored,
+      valueQuantity: { value: result.index, unit: "score", system: UCUM, code: "{score}" },
+      interpretation: [{
+        coding: [{ system: "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", code: interpretationCode }],
+        text: result.level,
+      }],
+      note: [
+        { text: "Explanation: " + (result.factors.length
+          ? result.factors.map((f) => f.question + "=" + f.answer + " (-" + f.penalty + ")").join("; ")
+          : "no negative signs observed") },
+        { text: "Data confidence: " + q.confidence + (q.issues.length ? " [" + q.issues.map((i) => i.code).join(", ") + "]" : "") },
+      ],
+      derivedFrom: [ref(qrId)],
+      hasMember: obsIds.map(ref),
+    };
+    entries.push({ id: uuid(), resource: summary });
+
+    return {
+      resourceType: "Bundle",
+      type: "transaction",
+      timestamp: new Date().toISOString(),
+      entry: entries.map((e) => ({
+        fullUrl: "urn:uuid:" + e.id,
+        resource: e.resource,
+        request: { method: "POST", url: e.resource.resourceType },
+      })),
+    };
+  }
+
+  /** Minimal structural validation of a Bundle (used by tests and the UI). */
+  function validateBundle(bundle) {
+    const errors = [];
+    if (bundle.resourceType !== "Bundle") errors.push("not a Bundle");
+    if (bundle.type !== "transaction") errors.push("Bundle.type must be transaction");
+    const urls = new Set((bundle.entry || []).map((e) => e.fullUrl));
+    for (const e of bundle.entry || []) {
+      const r = e.resource;
+      if (!/^urn:uuid:[0-9a-f-]{36}$/.test(e.fullUrl)) errors.push("bad fullUrl " + e.fullUrl);
+      if (!e.request || e.request.method !== "POST" || e.request.url !== r.resourceType) errors.push("bad request on " + e.fullUrl);
+      if (r.resourceType === "Observation") {
+        if (!r.status || !r.code) errors.push("Observation missing status/code");
+        const values = Object.keys(r).filter((k) => k.startsWith("value"));
+        if (values.length > 1) errors.push("Observation has several value[x]");
+      }
+      if (r.resourceType === "QuestionnaireResponse" && !r.status) errors.push("QR missing status");
+      // every internal reference must resolve inside the bundle
+      JSON.stringify(r, (k, v) => {
+        if (k === "reference" && typeof v === "string" && v.startsWith("urn:uuid:") && !urls.has(v)) {
+          errors.push("dangling reference " + v);
+        }
+        return v;
+      });
+    }
+    return errors;
+  }
+
+  const api = { QUESTIONS, MAX_PENALTY, score, quality, advice, fhirQuestionnaire, fhirBundle, validateBundle, QUESTIONNAIRE_URL };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  else root.RanokaCore = api;
+})(typeof globalThis !== "undefined" ? globalThis : this);
+
+</script>
+<script>
+/* Ranoka translations: English, French, Malagasy. */
+(function (root) {
+  "use strict";
+
+  const STRINGS = {
+    en: {
+      "app.tagline": "A 60-second stream check anyone can do. Explained results. Standards-ready data.",
+      "nav.check": "New check",
+      "nav.history": "My checks",
+      "nav.about": "About",
+      "site.title": "Where are you?",
+      "site.name": "Stream / site name",
+      "site.observer": "Your name or nickname (optional)",
+      "site.locate": "Use my location",
+      "site.located": "Location saved",
+      "site.locError": "Location unavailable — you can still continue",
+      "site.lat": "Latitude",
+      "site.lon": "Longitude",
+      "form.optional": "optional",
+      "form.submit": "See result",
+      "form.next": "Next",
+      "form.back": "Back",
+      "q.colour": "What colour is the water?",
+      "a.colour.clear": "Clear",
+      "a.colour.cloudy": "A bit cloudy",
+      "a.colour.brown": "Brown / muddy",
+      "a.colour.green": "Green",
+      "a.colour.unusual": "Unusual (milky, red, black…)",
+      "q.smell": "How does it smell?",
+      "a.smell.none": "No smell",
+      "a.smell.earthy": "Natural (earth, plants)",
+      "a.smell.sewage": "Rotten / sewage",
+      "a.smell.chemical": "Chemical / fuel",
+      "q.foam": "Is there foam on the water?",
+      "a.foam.none": "No",
+      "a.foam.little": "A little, white",
+      "a.foam.lots": "A lot, it does not go away",
+      "q.oil": "Is there a shiny, rainbow film (oil) on the surface?",
+      "a.oil.no": "No",
+      "a.oil.yes": "Yes",
+      "q.litter": "Is there litter in or near the water?",
+      "a.litter.none": "None",
+      "a.litter.some": "Some",
+      "a.litter.lots": "A lot",
+      "q.deadAnimals": "Do you see dead fish or animals?",
+      "a.deadAnimals.no": "No",
+      "a.deadAnimals.yes": "Yes",
+      "q.algae": "Green slime or algae on the water?",
+      "a.algae.none": "None",
+      "a.algae.some": "A little",
+      "a.algae.mat": "A thick layer covering the water",
+      "q.banks": "Plants along the banks?",
+      "a.banks.natural": "Many, natural",
+      "a.banks.partial": "Some",
+      "a.banks.bare": "None (bare soil or concrete)",
+      "q.flow": "How is the water moving?",
+      "a.flow.flowing": "Flowing well",
+      "a.flow.slow": "Slowly",
+      "a.flow.stagnant": "Not moving",
+      "a.flow.dry": "Dry",
+      "q.invasive": "Did you see invasive plants or animals (e.g. water hyacinth)?",
+      "a.invasive.no": "No",
+      "a.invasive.unsure": "Not sure",
+      "a.invasive.yes": "Yes",
+      "q.temperature": "Water temperature (°C) — if you have a thermometer",
+      "q.ph": "pH — if you have a pH strip",
+      "result.title": "Stream health",
+      "level.good": "Good",
+      "level.moderate": "Moderate",
+      "level.poor": "Poor",
+      "level.alert": "Alert",
+      "result.why": "Why this result?",
+      "result.noFactors": "No warning signs observed.",
+      "result.criticalTitle": "Warning signs that need attention",
+      "result.advice": "What should I do?",
+      "result.quality": "Data check",
+      "result.confidence": "Confidence",
+      "conf.high": "High",
+      "conf.medium": "Medium",
+      "conf.low": "Low",
+      "result.save": "Save check",
+      "result.saved": "Saved on this device",
+      "result.fhir": "Download FHIR data",
+      "result.new": "New check",
+      "advice.people.avoid": "People: avoid touching the water. Keep children away. Do not fish or wash here today.",
+      "advice.people.washHands": "People: wash your hands with clean water after contact.",
+      "advice.people.ok": "People: no warning signs today — still wash your hands after contact.",
+      "advice.animals.keepAway": "Animals: keep dogs and livestock from drinking or swimming here.",
+      "advice.animals.noDrink": "Animals: do not let pets or livestock drink this water.",
+      "advice.animals.algaeToxic": "Animals: thick algae can be toxic (cyanobacteria) — very dangerous for dogs.",
+      "advice.env.report": "Environment: report this check to your local water or environment authority.",
+      "advice.env.monitor": "Environment: come back next week and check again to follow the trend.",
+      "advice.env.cleanup": "Environment: organise a clean-up with neighbours.",
+      "advice.env.invasive": "Environment: take a photo of the invasive species for the experts.",
+      "issue.missing.colour": "Water colour not answered",
+      "issue.missing.smell": "Smell not answered",
+      "issue.missing.foam": "Foam not answered",
+      "issue.missing.oil": "Oil film not answered",
+      "issue.missing.litter": "Litter not answered",
+      "issue.missing.deadAnimals": "Dead animals not answered",
+      "issue.missing.algae": "Algae not answered",
+      "issue.missing.banks": "Banks not answered",
+      "issue.missing.flow": "Flow not answered",
+      "issue.missing.invasive": "Invasive species not answered",
+      "issue.missing.location": "No location: scientists cannot map this check",
+      "issue.location.imprecise": "Location is imprecise (>200 m)",
+      "issue.range.temperature": "Temperature looks wrong (expected 0–40 °C)",
+      "issue.range.ph": "pH looks wrong (expected 3–11)",
+      "issue.inconsistent.dryWater": "The stream is dry but water signs were reported",
+      "issue.inconsistent.clearAlgae": "Clear water with a thick algae layer is unusual — please check again",
+      "issue.time.future": "Date is in the future",
+      "history.empty": "No saved checks yet.",
+      "history.export": "Download all as FHIR",
+      "history.clear": "Delete all",
+      "history.confirmClear": "Delete all saved checks on this device?",
+      "about.text": "Ranoka (\"water\" in Malagasy) turns what anyone can see at a stream into an explained health signal for people, animals and the environment (One Health), and into HL7 FHIR R4 data that researchers and health systems can reuse. It works offline and stores data only on your device until you export it.",
+    },
+    fr: {
+      "app.tagline": "Un contrôle de rivière en 60 secondes, pour tous. Résultat expliqué. Données aux normes.",
+      "nav.check": "Nouveau contrôle",
+      "nav.history": "Mes contrôles",
+      "nav.about": "À propos",
+      "site.title": "Où êtes-vous ?",
+      "site.name": "Nom de la rivière / du site",
+      "site.observer": "Votre nom ou pseudo (facultatif)",
+      "site.locate": "Utiliser ma position",
+      "site.located": "Position enregistrée",
+      "site.locError": "Position indisponible — vous pouvez continuer",
+      "site.lat": "Latitude",
+      "site.lon": "Longitude",
+      "form.optional": "facultatif",
+      "form.submit": "Voir le résultat",
+      "form.next": "Suivant",
+      "form.back": "Retour",
+      "q.colour": "De quelle couleur est l'eau ?",
+      "a.colour.clear": "Claire",
+      "a.colour.cloudy": "Un peu trouble",
+      "a.colour.brown": "Marron / boueuse",
+      "a.colour.green": "Verte",
+      "a.colour.unusual": "Inhabituelle (laiteuse, rouge, noire…)",
+      "q.smell": "Quelle odeur ?",
+      "a.smell.none": "Aucune odeur",
+      "a.smell.earthy": "Naturelle (terre, plantes)",
+      "a.smell.sewage": "Pourri / égout",
+      "a.smell.chemical": "Chimique / carburant",
+      "q.foam": "Y a-t-il de la mousse sur l'eau ?",
+      "a.foam.none": "Non",
+      "a.foam.little": "Un peu, blanche",
+      "a.foam.lots": "Beaucoup, elle ne disparaît pas",
+      "q.oil": "Y a-t-il un film brillant aux reflets arc-en-ciel (huile) ?",
+      "a.oil.no": "Non",
+      "a.oil.yes": "Oui",
+      "q.litter": "Y a-t-il des déchets dans ou près de l'eau ?",
+      "a.litter.none": "Aucun",
+      "a.litter.some": "Quelques-uns",
+      "a.litter.lots": "Beaucoup",
+      "q.deadAnimals": "Voyez-vous des poissons ou animaux morts ?",
+      "a.deadAnimals.no": "Non",
+      "a.deadAnimals.yes": "Oui",
+      "q.algae": "Des algues vertes ou de la vase verte sur l'eau ?",
+      "a.algae.none": "Aucune",
+      "a.algae.some": "Un peu",
+      "a.algae.mat": "Une couche épaisse qui couvre l'eau",
+      "q.banks": "Des plantes sur les berges ?",
+      "a.banks.natural": "Beaucoup, naturelles",
+      "a.banks.partial": "Quelques-unes",
+      "a.banks.bare": "Aucune (terre nue ou béton)",
+      "q.flow": "Comment l'eau s'écoule-t-elle ?",
+      "a.flow.flowing": "Elle coule bien",
+      "a.flow.slow": "Lentement",
+      "a.flow.stagnant": "Elle ne bouge pas",
+      "a.flow.dry": "À sec",
+      "q.invasive": "Avez-vous vu des espèces invasives (ex. jacinthe d'eau) ?",
+      "a.invasive.no": "Non",
+      "a.invasive.unsure": "Je ne sais pas",
+      "a.invasive.yes": "Oui",
+      "q.temperature": "Température de l'eau (°C) — si vous avez un thermomètre",
+      "q.ph": "pH — si vous avez une bandelette pH",
+      "result.title": "Santé de la rivière",
+      "level.good": "Bonne",
+      "level.moderate": "Moyenne",
+      "level.poor": "Mauvaise",
+      "level.alert": "Alerte",
+      "result.why": "Pourquoi ce résultat ?",
+      "result.noFactors": "Aucun signe d'alerte observé.",
+      "result.criticalTitle": "Signes d'alerte à prendre au sérieux",
+      "result.advice": "Que dois-je faire ?",
+      "result.quality": "Vérification des données",
+      "result.confidence": "Fiabilité",
+      "conf.high": "Élevée",
+      "conf.medium": "Moyenne",
+      "conf.low": "Faible",
+      "result.save": "Enregistrer",
+      "result.saved": "Enregistré sur cet appareil",
+      "result.fhir": "Télécharger les données FHIR",
+      "result.new": "Nouveau contrôle",
+      "advice.people.avoid": "Personnes : évitez de toucher l'eau. Éloignez les enfants. Ne pêchez pas et ne lavez rien ici aujourd'hui.",
+      "advice.people.washHands": "Personnes : lavez-vous les mains à l'eau propre après contact.",
+      "advice.people.ok": "Personnes : pas de signe d'alerte aujourd'hui — lavez-vous quand même les mains après contact.",
+      "advice.animals.keepAway": "Animaux : empêchez chiens et bétail de boire ou de se baigner ici.",
+      "advice.animals.noDrink": "Animaux : ne laissez pas les animaux boire cette eau.",
+      "advice.animals.algaeToxic": "Animaux : les algues épaisses peuvent être toxiques (cyanobactéries) — très dangereux pour les chiens.",
+      "advice.env.report": "Environnement : signalez ce contrôle au service local de l'eau ou de l'environnement.",
+      "advice.env.monitor": "Environnement : revenez la semaine prochaine pour suivre l'évolution.",
+      "advice.env.cleanup": "Environnement : organisez un nettoyage avec vos voisins.",
+      "advice.env.invasive": "Environnement : prenez une photo de l'espèce invasive pour les experts.",
+      "issue.missing.colour": "Couleur de l'eau non renseignée",
+      "issue.missing.smell": "Odeur non renseignée",
+      "issue.missing.foam": "Mousse non renseignée",
+      "issue.missing.oil": "Film d'huile non renseigné",
+      "issue.missing.litter": "Déchets non renseignés",
+      "issue.missing.deadAnimals": "Animaux morts non renseigné",
+      "issue.missing.algae": "Algues non renseignées",
+      "issue.missing.banks": "Berges non renseignées",
+      "issue.missing.flow": "Écoulement non renseigné",
+      "issue.missing.invasive": "Espèces invasives non renseigné",
+      "issue.missing.location": "Pas de position : impossible de cartographier ce contrôle",
+      "issue.location.imprecise": "Position imprécise (> 200 m)",
+      "issue.range.temperature": "Température incohérente (attendu 0–40 °C)",
+      "issue.range.ph": "pH incohérent (attendu 3–11)",
+      "issue.inconsistent.dryWater": "La rivière est à sec mais des signes dans l'eau sont signalés",
+      "issue.inconsistent.clearAlgae": "Eau claire avec une couche épaisse d'algues : inhabituel, vérifiez",
+      "issue.time.future": "La date est dans le futur",
+      "history.empty": "Aucun contrôle enregistré.",
+      "history.export": "Tout télécharger en FHIR",
+      "history.clear": "Tout supprimer",
+      "history.confirmClear": "Supprimer tous les contrôles de cet appareil ?",
+      "about.text": "Ranoka (« eau » en malgache) transforme ce que chacun peut voir au bord d'une rivière en un signal de santé expliqué pour les personnes, les animaux et l'environnement (One Health), et en données HL7 FHIR R4 réutilisables par les chercheurs et les systèmes de santé. Fonctionne hors ligne ; les données restent sur votre appareil jusqu'à l'export.",
+    },
+    mg: {
+      "app.tagline": "Fanaraha-maso renirano ao anatin'ny 60 segondra, azon'ny rehetra atao. Valiny voazava. Angona ara-penitra.",
+      "nav.check": "Fanaraha-maso vaovao",
+      "nav.history": "Ny fanaraha-masoko",
+      "nav.about": "Mombamomba",
+      "site.title": "Aiza ianao izao?",
+      "site.name": "Anaran'ny renirano / toerana",
+      "site.observer": "Anaranao (tsy voatery)",
+      "site.locate": "Ampiasao ny toerana misy ahy",
+      "site.located": "Voatahiry ny toerana",
+      "site.locError": "Tsy hita ny toerana — afaka manohy ihany ianao",
+      "site.lat": "Latitude",
+      "site.lon": "Longitude",
+      "form.optional": "tsy voatery",
+      "form.submit": "Hijery ny valiny",
+      "form.next": "Manaraka",
+      "form.back": "Hiverina",
+      "q.colour": "Inona no lokon'ny rano?",
+      "a.colour.clear": "Mangarahara",
+      "a.colour.cloudy": "Manjavozavo kely",
+      "a.colour.brown": "Feno fotaka / volontany",
+      "a.colour.green": "Maitso",
+      "a.colour.unusual": "Hafahafa (fotsy toy ny ronono, mena, mainty…)",
+      "q.smell": "Manao ahoana ny fofony?",
+      "a.smell.none": "Tsy misy fofona",
+      "a.smell.earthy": "Voajanahary (tany, zavamaniry)",
+      "a.smell.sewage": "Maimbo (lo / maloto)",
+      "a.smell.chemical": "Fofona simika / solika",
+      "q.foam": "Misy vovony eny ambonin'ny rano ve?",
+      "a.foam.none": "Tsia",
+      "a.foam.little": "Kely, fotsy",
+      "a.foam.lots": "Be dia be, tsy levona",
+      "q.oil": "Misy sosona mamirapiratra miloko avana (solika) eny ambony ve?",
+      "a.oil.no": "Tsia",
+      "a.oil.yes": "Eny",
+      "q.litter": "Misy fako ao anaty rano na manodidina ve?",
+      "a.litter.none": "Tsy misy",
+      "a.litter.some": "Misy kely",
+      "a.litter.lots": "Be dia be",
+      "q.deadAnimals": "Mahita trondro na biby maty ve ianao?",
+      "a.deadAnimals.no": "Tsia",
+      "a.deadAnimals.yes": "Eny",
+      "q.algae": "Misy ahidrano maitso (algues) eny ambonin'ny rano ve?",
+      "a.algae.none": "Tsy misy",
+      "a.algae.some": "Kely",
+      "a.algae.mat": "Sosona matevina mandrakotra ny rano",
+      "q.banks": "Misy zavamaniry eny amoron-drano ve?",
+      "a.banks.natural": "Maro sady voajanahary",
+      "a.banks.partial": "Vitsivitsy",
+      "a.banks.bare": "Tsy misy (tany mibaribary na beton)",
+      "q.flow": "Manao ahoana ny fikorianan'ny rano?",
+      "a.flow.flowing": "Mikoriana tsara",
+      "a.flow.slow": "Miadana",
+      "a.flow.stagnant": "Tsy mihetsika",
+      "a.flow.dry": "Ritra",
+      "q.invasive": "Nahita zavamaniry na biby manimba (oh. jacinthe d'eau) ve ianao?",
+      "a.invasive.no": "Tsia",
+      "a.invasive.unsure": "Tsy azoko antoka",
+      "a.invasive.yes": "Eny",
+      "q.temperature": "Hafanan'ny rano (°C) — raha manana thermomètre",
+      "q.ph": "pH — raha manana taratasy pH",
+      "result.title": "Fahasalaman'ny renirano",
+      "level.good": "Tsara",
+      "level.moderate": "Antonony",
+      "level.poor": "Ratsy",
+      "level.alert": "Loza",
+      "result.why": "Nahoana izany valiny izany?",
+      "result.noFactors": "Tsy nisy famantarana mampanahy.",
+      "result.criticalTitle": "Famantarana mila fitandremana",
+      "result.advice": "Inona no tokony hataoko?",
+      "result.quality": "Fanamarinana ny angona",
+      "result.confidence": "Fahatokisana",
+      "conf.high": "Avo",
+      "conf.medium": "Antonony",
+      "conf.low": "Ambany",
+      "result.save": "Tehirizina",
+      "result.saved": "Voatahiry amin'ity fitaovana ity",
+      "result.fhir": "Haka ny angona FHIR",
+      "result.new": "Fanaraha-maso vaovao",
+      "advice.people.avoid": "Olona: aza mikasika ny rano. Ataovy lavitra ny ankizy. Aza manjono na manasa zavatra eto anio.",
+      "advice.people.washHands": "Olona: sasao amin'ny rano madio ny tananao rehefa avy nikasika.",
+      "advice.people.ok": "Olona: tsy misy famantarana mampanahy anio — sasao ihany ny tananao rehefa avy nikasika.",
+      "advice.animals.keepAway": "Biby: aza avela hisotro na hilomano eto ny alika sy ny biby fiompy.",
+      "advice.animals.noDrink": "Biby: aza avela hisotro ity rano ity ny biby.",
+      "advice.animals.algaeToxic": "Biby: mety ho misy poizina ny ahidrano matevina (cyanobactéries) — tena mampidi-doza ho an'ny alika.",
+      "advice.env.report": "Tontolo iainana: ampahafantaro ny sampan-draharaha misahana ny rano na ny tontolo iainana eo an-toerana.",
+      "advice.env.monitor": "Tontolo iainana: miverena amin'ny herinandro ho avy hanaraha-maso ny fivoarany.",
+      "advice.env.cleanup": "Tontolo iainana: mikarakarà fanadiovana miaraka amin'ny mpifanolo-bodirindrina.",
+      "advice.env.invasive": "Tontolo iainana: makà sary ilay zavamananaina manimba ho an'ny manam-pahaizana.",
+      "issue.missing.colour": "Tsy voavaly ny lokon'ny rano",
+      "issue.missing.smell": "Tsy voavaly ny fofona",
+      "issue.missing.foam": "Tsy voavaly ny vovony",
+      "issue.missing.oil": "Tsy voavaly ny solika",
+      "issue.missing.litter": "Tsy voavaly ny fako",
+      "issue.missing.deadAnimals": "Tsy voavaly ny biby maty",
+      "issue.missing.algae": "Tsy voavaly ny ahidrano",
+      "issue.missing.banks": "Tsy voavaly ny amoron-drano",
+      "issue.missing.flow": "Tsy voavaly ny fikorianana",
+      "issue.missing.invasive": "Tsy voavaly ny zavamananaina manimba",
+      "issue.missing.location": "Tsy misy toerana: tsy azon'ny mpikaroka apetraka amin'ny sarintany",
+      "issue.location.imprecise": "Tsy marina tsara ny toerana (> 200 m)",
+      "issue.range.temperature": "Toa diso ny hafanana (0–40 °C no andrasana)",
+      "issue.range.ph": "Toa diso ny pH (3–11 no andrasana)",
+      "issue.inconsistent.dryWater": "Ritra ny renirano nefa nisy famantarana tao anaty rano voalaza",
+      "issue.inconsistent.clearAlgae": "Hafahafa ny rano mangarahara misy ahidrano matevina — jereo indray",
+      "issue.time.future": "Daty any amin'ny ho avy",
+      "history.empty": "Mbola tsy misy fanaraha-maso voatahiry.",
+      "history.export": "Haka izy rehetra amin'ny FHIR",
+      "history.clear": "Fafao daholo",
+      "history.confirmClear": "Hofafana daholo ve ny fanaraha-maso rehetra amin'ity fitaovana ity?",
+      "about.text": "Ranoka dia mamadika izay hitan'ny rehetra eny amoron-drano ho famantarana voazava momba ny fahasalaman'ny olona, ny biby ary ny tontolo iainana (One Health), sy ho angona HL7 FHIR R4 azon'ny mpikaroka sy ny rafitra ara-pahasalamana ampiasaina. Mandeha na tsy misy Internet; mijanona ao amin'ny fitaovanao ihany ny angona mandra-pandefasanao azy.",
+    },
+  };
+
+  function translator(lang) {
+    const table = STRINGS[lang] || STRINGS.en;
+    return (key) => (key in table ? table[key] : STRINGS.en[key] !== undefined ? STRINGS.en[key] : key);
+  }
+
+  const api = { STRINGS, translator, LANGS: ["en", "fr", "mg"] };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  else root.RanokaI18n = api;
+})(typeof globalThis !== "undefined" ? globalThis : this);
+
+</script>
+<script>
+/* Ranoka UI: one question per screen, explained result, local history, FHIR export. */
+(function () {
+  "use strict";
+  const Core = window.RanokaCore;
+  const I18n = window.RanokaI18n;
+  const STORE_KEY = "ranoka.checks.v1";
+  const LANG_KEY = "ranoka.lang";
+
+  const state = {
+    lang: safeGet(LANG_KEY) || pickLang(),
+    view: "check",
+    step: 0, // 0 = site, 1..N = questions, N+1 = result
+    answers: {},
+    meta: {},
+    savedId: null,
+  };
+  let t = I18n.translator(state.lang);
+
+  function pickLang() {
+    const l = (navigator.language || "en").slice(0, 2);
+    return I18n.LANGS.includes(l) ? l : "en";
+  }
+  function safeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function safeSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* private mode */ } }
+  function loadChecks() {
+    try { return JSON.parse(safeGet(STORE_KEY) || "[]"); } catch (e) { return []; }
+  }
+  function saveChecks(list) { safeSet(STORE_KEY, JSON.stringify(list)); }
+
+  const $ = (sel) => document.querySelector(sel);
+  function h(tag, attrs, ...children) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+      else if (v === true) el.setAttribute(k, "");
+      else if (v !== false && v != null) el.setAttribute(k, v);
+    }
+    for (const c of children.flat()) {
+      if (c == null || c === false) continue;
+      el.appendChild(typeof c === "string" || typeof c === "number" ? document.createTextNode(String(c)) : c);
+    }
+    return el;
+  }
+
+  function download(name, obj) {
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/fhir+json" });
+    const a = h("a", { href: URL.createObjectURL(blob), download: name });
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+
+  function renderChrome() {
+    document.documentElement.lang = state.lang === "mg" ? "mg" : state.lang;
+    $("#tagline").textContent = t("app.tagline");
+    const nav = $("#nav");
+    nav.replaceChildren(
+      ...["check", "history", "about"].map((v) =>
+        h("button", {
+          class: "tab" + (state.view === v ? " active" : ""),
+          "aria-current": state.view === v ? "page" : false,
+          onclick: () => { state.view = v; render(); },
+        }, t("nav." + v))
+      )
+    );
+    const langs = $("#langs");
+    langs.replaceChildren(
+      ...I18n.LANGS.map((l) =>
+        h("button", {
+          class: "lang" + (state.lang === l ? " active" : ""),
+          "aria-pressed": state.lang === l ? "true" : "false",
+          onclick: () => { state.lang = l; safeSet(LANG_KEY, l); t = I18n.translator(l); render(); },
+        }, l.toUpperCase())
+      )
+    );
+  }
+
+  function render() {
+    renderChrome();
+    const main = $("#main");
+    if (state.view === "history") main.replaceChildren(renderHistory());
+    else if (state.view === "about") main.replaceChildren(renderAbout());
+    else main.replaceChildren(renderCheck());
+    main.focus({ preventScroll: true });
+  }
+
+  function progress() {
+    const total = Core.QUESTIONS.length + 1;
+    const pct = Math.round((Math.min(state.step, total) / total) * 100);
+    return h("div", { class: "progress", role: "progressbar", "aria-valuenow": pct, "aria-valuemin": 0, "aria-valuemax": 100 },
+      h("div", { class: "bar", style: "width:" + pct + "%" }));
+  }
+
+  function renderCheck() {
+    const n = Core.QUESTIONS.length;
+    if (state.step === 0) return renderSite();
+    if (state.step <= n) return renderQuestion(Core.QUESTIONS[state.step - 1]);
+    return renderResult();
+  }
+
+  function renderSite() {
+    const m = state.meta;
+    const status = h("p", { class: "muted", id: "locstatus" },
+      typeof m.latitude === "number" ? t("site.located") + " (" + m.latitude.toFixed(5) + ", " + m.longitude.toFixed(5) + ")" : "");
+    const latIn = h("input", { type: "number", step: "any", id: "lat", value: m.latitude ?? "", inputmode: "decimal" });
+    const lonIn = h("input", { type: "number", step: "any", id: "lon", value: m.longitude ?? "", inputmode: "decimal" });
+    const nameIn = h("input", { type: "text", id: "site", value: m.siteName || "", autocomplete: "off" });
+    const obsIn = h("input", { type: "text", id: "observer", value: m.observer || "", autocomplete: "nickname" });
+    return h("section", { class: "card" },
+      progress(),
+      h("h2", {}, t("site.title")),
+      h("label", { for: "site" }, t("site.name")), nameIn,
+      h("label", { for: "observer" }, t("site.observer")), obsIn,
+      h("button", { class: "secondary", onclick: () => {
+        if (!navigator.geolocation) { status.textContent = t("site.locError"); return; }
+        navigator.geolocation.getCurrentPosition((p) => {
+          m.latitude = +p.coords.latitude.toFixed(6);
+          m.longitude = +p.coords.longitude.toFixed(6);
+          m.accuracy = Math.round(p.coords.accuracy);
+          latIn.value = m.latitude; lonIn.value = m.longitude;
+          status.textContent = t("site.located") + " (±" + m.accuracy + " m)";
+        }, () => { status.textContent = t("site.locError"); }, { enableHighAccuracy: true, timeout: 10000 });
+      } }, "📍 " + t("site.locate")),
+      status,
+      h("div", { class: "row" },
+        h("div", {}, h("label", { for: "lat" }, t("site.lat")), latIn),
+        h("div", {}, h("label", { for: "lon" }, t("site.lon")), lonIn)),
+      h("div", { class: "actions" },
+        h("span"),
+        h("button", { class: "primary", onclick: () => {
+          m.siteName = nameIn.value.trim();
+          m.observer = obsIn.value.trim();
+          const la = parseFloat(latIn.value), lo = parseFloat(lonIn.value);
+          if (!Number.isNaN(la) && !Number.isNaN(lo)) { m.latitude = la; m.longitude = lo; }
+          else { delete m.latitude; delete m.longitude; }
+          state.step = 1; render();
+        } }, t("form.next") + " →"))
+    );
+  }
+
+  function renderQuestion(q) {
+    const back = h("button", { class: "secondary", onclick: () => { state.step--; render(); } }, "← " + t("form.back"));
+    const isLast = state.step === Core.QUESTIONS.length;
+    const nextLabel = isLast ? t("form.submit") : t("form.next") + " →";
+    if (q.type === "choice") {
+      const choices = h("div", { class: "choices", role: "radiogroup", "aria-label": t("q." + q.id) },
+        q.options.map((o) => h("button", {
+          class: "choice" + (state.answers[q.id] === o.code ? " selected" : ""),
+          role: "radio",
+          "aria-checked": state.answers[q.id] === o.code ? "true" : "false",
+          onclick: () => { state.answers[q.id] = o.code; state.step++; render(); },
+        }, t("a." + q.id + "." + o.code))));
+      return h("section", { class: "card" }, progress(),
+        h("p", { class: "muted" }, state.step + " / " + Core.QUESTIONS.length),
+        h("h2", {}, t("q." + q.id)), choices,
+        h("div", { class: "actions" }, back, state.answers[q.id]
+          ? h("button", { class: "primary", onclick: () => { state.step++; render(); } }, nextLabel) : h("span")));
+    }
+    const input = h("input", { type: "number", step: "0.1", id: "num", inputmode: "decimal", value: state.answers[q.id] ?? "" });
+    return h("section", { class: "card" }, progress(),
+      h("p", { class: "muted" }, state.step + " / " + Core.QUESTIONS.length + " · " + t("form.optional")),
+      h("h2", {}, h("label", { for: "num" }, t("q." + q.id))), input,
+      h("div", { class: "actions" }, back,
+        h("button", { class: "primary", onclick: () => {
+          const v = input.value.trim();
+          if (v === "") delete state.answers[q.id]; else state.answers[q.id] = parseFloat(v);
+          if (isLast) state.meta.authored = new Date().toISOString();
+          state.step++; render();
+        } }, nextLabel)));
+  }
+
+  function gauge(index, level) {
+    const r = 52, c = 2 * Math.PI * r;
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", "0 0 120 120");
+    svg.setAttribute("class", "gauge lvl-" + level);
+    svg.setAttribute("aria-hidden", "true");
+    const mk = (tag, a) => { const e = document.createElementNS(ns, tag); for (const k in a) e.setAttribute(k, a[k]); return e; };
+    svg.appendChild(mk("circle", { cx: 60, cy: 60, r, class: "track" }));
+    svg.appendChild(mk("circle", { cx: 60, cy: 60, r, class: "value", "stroke-dasharray": c, "stroke-dashoffset": c * (1 - index / 100), transform: "rotate(-90 60 60)" }));
+    const txt = mk("text", { x: 60, y: 68, "text-anchor": "middle", class: "num" });
+    txt.textContent = index;
+    svg.appendChild(txt);
+    return svg;
+  }
+
+  function factorLabel(f) {
+    const q = Core.QUESTIONS.find((x) => x.id === f.question);
+    const ans = q.type === "choice" ? t("a." + f.question + "." + f.answer) : String(f.answer);
+    return t("q." + f.question) + " → " + ans;
+  }
+
+  function renderResult() {
+    if (!state.meta.authored) state.meta.authored = new Date().toISOString();
+    const r = Core.score(state.answers);
+    const q = Core.quality(state.answers, state.meta);
+    const record = { id: state.savedId, answers: state.answers, meta: state.meta };
+    const savedMsg = h("p", { class: "muted", role: "status" }, state.savedId ? t("result.saved") : "");
+    return h("section", { class: "card result" },
+      h("h2", {}, t("result.title") + (state.meta.siteName ? " — " + state.meta.siteName : "")),
+      h("div", { class: "score" }, gauge(r.index, r.level),
+        h("div", {}, h("div", { class: "badge lvl-" + r.level }, t("level." + r.level)),
+          h("p", { class: "muted" }, new Date(state.meta.authored).toLocaleString(state.lang)))),
+      r.critical.length ? h("div", { class: "alert" },
+        h("strong", {}, "⚠ " + t("result.criticalTitle")),
+        h("ul", {}, r.critical.map((c) => h("li", {}, factorLabel(c))))) : null,
+      h("h3", {}, t("result.why")),
+      r.factors.length
+        ? h("ul", { class: "factors" }, r.factors.map((f) =>
+            h("li", {}, h("span", {}, factorLabel(f)), h("span", { class: "pen" }, "−" + Math.round((100 * f.penalty) / r.maxPenalty)))))
+        : h("p", {}, t("result.noFactors")),
+      h("h3", {}, t("result.advice")),
+      h("ul", { class: "advice" }, r.advice.map((a) => h("li", { class: "adv-" + a.split(".")[0] }, t("advice." + a)))),
+      h("h3", {}, t("result.quality")),
+      h("p", {}, t("result.confidence") + ": ", h("strong", { class: "conf-" + q.confidence }, t("conf." + q.confidence))),
+      q.issues.length ? h("ul", { class: "issues" }, q.issues.map((i) => h("li", { class: i.severity }, t("issue." + i.code)))) : null,
+      h("div", { class: "actions wrap" },
+        h("button", { class: "primary", disabled: !!state.savedId, onclick: (e) => {
+          const list = loadChecks();
+          const id = Date.now().toString(36);
+          list.unshift({ id, answers: { ...state.answers }, meta: { ...state.meta } });
+          saveChecks(list);
+          state.savedId = id;
+          e.target.disabled = true;
+          savedMsg.textContent = t("result.saved");
+        } }, t("result.save")),
+        h("button", { class: "secondary", onclick: () => {
+          download("ranoka-check-" + state.meta.authored.slice(0, 10) + ".json", Core.fhirBundle(record, t));
+        } }, "⬇ " + t("result.fhir")),
+        h("button", { class: "secondary", onclick: resetCheck }, t("result.new"))),
+      savedMsg);
+  }
+
+  function resetCheck() {
+    const keep = { siteName: state.meta.siteName, observer: state.meta.observer, latitude: state.meta.latitude, longitude: state.meta.longitude, accuracy: state.meta.accuracy };
+    state.answers = {}; state.meta = keep; state.step = 0; state.savedId = null; state.view = "check";
+    render();
+  }
+
+  function renderHistory() {
+    const list = loadChecks();
+    if (!list.length) return h("section", { class: "card" }, h("p", {}, t("history.empty")));
+    const bySite = {};
+    for (const c of list) (bySite[c.meta.siteName || "—"] ||= []).push(c);
+    return h("section", { class: "card" },
+      h("h2", {}, t("nav.history")),
+      Object.entries(bySite).map(([site, checks]) => {
+        const scores = checks.map((c) => Core.score(c.answers)).reverse();
+        return h("div", { class: "site" },
+          h("h3", {}, site),
+          sparkline(scores.map((s) => s.index)),
+          h("ul", { class: "hist" }, checks.map((c) => {
+            const s = Core.score(c.answers);
+            return h("li", {},
+              h("span", { class: "badge small lvl-" + s.level }, s.index),
+              h("span", {}, new Date(c.meta.authored).toLocaleString(state.lang)),
+              h("span", { class: "muted" }, t("level." + s.level)));
+          })));
+      }),
+      h("div", { class: "actions wrap" },
+        h("button", { class: "primary", onclick: () => {
+          const bundles = list.map((c) => Core.fhirBundle(c, t));
+          download("ranoka-all-checks.json", { resourceType: "Bundle", type: "batch",
+            entry: bundles.map((b) => ({ resource: b, request: { method: "POST", url: "/" } })) });
+        } }, "⬇ " + t("history.export")),
+        h("button", { class: "danger", onclick: () => {
+          if (confirm(t("history.confirmClear"))) { saveChecks([]); render(); }
+        } }, t("history.clear"))));
+  }
+
+  function sparkline(values) {
+    if (values.length < 2) return null;
+    const w = 240, hgt = 48;
+    const pts = values.map((v, i) => [(i / (values.length - 1)) * (w - 8) + 4, hgt - 4 - (v / 100) * (hgt - 8)]);
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", "0 0 " + w + " " + hgt);
+    svg.setAttribute("class", "spark");
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", values.join(", "));
+    const p = document.createElementNS(ns, "polyline");
+    p.setAttribute("points", pts.map((x) => x.join(",")).join(" "));
+    svg.appendChild(p);
+    return svg;
+  }
+
+  function renderAbout() {
+    return h("section", { class: "card" },
+      h("h2", {}, "Ranoka"),
+      h("p", {}, t("about.text")),
+      h("h3", {}, "HL7 FHIR R4"),
+      h("p", { class: "muted" }, "Questionnaire · QuestionnaireResponse · Location · Observation (survey) · transaction Bundle"),
+      h("button", { class: "secondary", onclick: () => download("ranoka-questionnaire.json", Core.fhirQuestionnaire(t)) },
+        "⬇ Questionnaire (FHIR)"));
+  }
+
+  window.addEventListener("DOMContentLoaded", render);
+})();
+
+</script>
+</body>
+</html>

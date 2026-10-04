@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b6e79">
+<title>Ranoka Stream Check</title>
+<meta name="description" content="Ranoka: a 60-second citizen stream check with explained One Health results and HL7 FHIR R4 export.">
+<style>
+:root {
+  --bg: #f4f8f8; --card: #ffffff; --ink: #14262b; --muted: #5a6e73; --line: #d8e3e5;
+  --brand: #0b6e79; --brand-ink: #ffffff; --sel: #e2f3f4;
+  --good: #1f8a4c; --moderate: #b88a00; --poor: #d0641a; --alert: #c62828;
+  --alert-bg: #fdecec;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1719; --card: #162326; --ink: #e5eff0; --muted: #9db2b6; --line: #2a3b3f;
+    --brand: #3fb6c2; --brand-ink: #062226; --sel: #1d3a3e;
+    --good: #4cc982; --moderate: #e2b72e; --poor: #f08a45; --alert: #ff6b6b; --alert-bg: #3a1c1c;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1719; --card: #162326; --ink: #e5eff0; --muted: #9db2b6; --line: #2a3b3f;
+  --brand: #3fb6c2; --brand-ink: #062226; --sel: #1d3a3e;
+  --good: #4cc982; --moderate: #e2b72e; --poor: #f08a45; --alert: #ff6b6b; --alert-bg: #3a1c1c;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { max-width: 640px; margin: 0 auto; padding: 16px 16px 0; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+h1 { margin: 0; font-size: 1.5rem; color: var(--brand); letter-spacing: .02em; }
+h1 span { font-size: 1.6rem; }
+#tagline { margin: 4px 0 12px; color: var(--muted); font-size: .95rem; }
+#langs { display: flex; gap: 4px; }
+.lang { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 8px; padding: 4px 8px; font-weight: 600; cursor: pointer; }
+.lang.active { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+#nav { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tab { background: none; border: 0; padding: 10px 12px; color: var(--muted); font-size: .95rem; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
+.tab.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 600; }
+main { max-width: 640px; margin: 0 auto; padding: 16px; outline: none; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+h2 { margin: 8px 0 16px; font-size: 1.3rem; }
+h3 { margin: 20px 0 8px; font-size: 1.05rem; }
+label { display: block; margin: 12px 0 4px; font-weight: 600; font-size: .9rem; }
+input { width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 1rem; background: var(--bg); color: var(--ink); }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.muted { color: var(--muted); font-size: .9rem; margin: 6px 0; }
+button { font: inherit; cursor: pointer; }
+.primary, .secondary, .danger { border-radius: 10px; padding: 12px 16px; font-weight: 600; border: 1px solid var(--brand); }
+.primary { background: var(--brand); color: var(--brand-ink); }
+.primary:disabled { opacity: .5; cursor: default; }
+.secondary { background: transparent; color: var(--brand); margin-top: 12px; }
+.danger { background: transparent; color: var(--alert); border-color: var(--alert); margin-top: 12px; }
+.actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 20px; }
+.actions.wrap { flex-wrap: wrap; justify-content: flex-start; }
+.actions .secondary { margin-top: 0; }
+.choices { display: grid; gap: 10px; }
+.choice { text-align: left; padding: 16px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); font-size: 1.05rem; min-height: 56px; }
+.choice:hover { border-color: var(--brand); }
+.choice.selected { border-color: var(--brand); background: var(--sel); font-weight: 600; }
+.progress { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.progress .bar { height: 100%; background: var(--brand); transition: width .2s; }
+.score { display: flex; align-items: center; gap: 20px; }
+.gauge { width: 120px; height: 120px; flex: none; }
+.gauge circle { fill: none; stroke-width: 12; }
+.gauge .track { stroke: var(--line); }
+.gauge .value { stroke-linecap: round; transition: stroke-dashoffset .6s; }
+.gauge .num { font-size: 30px; font-weight: 700; fill: var(--ink); }
+.gauge.lvl-good .value { stroke: var(--good); } .gauge.lvl-moderate .value { stroke: var(--moderate); }
+.gauge.lvl-poor .value { stroke: var(--poor); } .gauge.lvl-alert .value { stroke: var(--alert); }
+.badge { display: inline-block; padding: 6px 14px; border-radius: 999px; font-weight: 700; color: #fff; font-size: 1.1rem; }
+.badge.small { font-size: .85rem; padding: 2px 10px; min-width: 42px; text-align: center; }
+.lvl-good.badge { background: var(--good); } .lvl-moderate.badge { background: var(--moderate); }
+.lvl-poor.badge { background: var(--poor); } .lvl-alert.badge { background: var(--alert); }
+.alert { margin-top: 16px; padding: 12px 16px; border-radius: 12px; background: var(--alert-bg); border-left: 4px solid var(--alert); }
+.alert ul { margin: 6px 0 0; padding-left: 20px; }
+ul.factors, ul.advice, ul.issues, ul.hist { list-style: none; padding: 0; margin: 0; }
+.factors li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.factors .pen { color: var(--poor); font-weight: 700; white-space: nowrap; }
+.advice li { padding: 10px 12px; margin-bottom: 8px; border-radius: 10px; background: var(--sel); }
+.issues li { padding: 6px 0; }
+.issues li.error::before { content: "✖ "; color: var(--alert); }
+.issues li.warning::before { content: "! "; color: var(--moderate); font-weight: 700; }
+.conf-high { color: var(--good); } .conf-medium { color: var(--moderate); } .conf-low { color: var(--alert); }
+.site { border-top: 1px solid var(--line); padding-top: 8px; }
+.hist li { display: flex; gap: 12px; align-items: center; padding: 6px 0; flex-wrap: wrap; }
+.spark { width: 100%; max-width: 240px; height: 48px; }
+.spark polyline { fill: none; stroke: var(--brand); stroke-width: 2.5; stroke-linejoin: round; }
+footer { max-width: 640px; margin: 0 auto; padding: 8px 16px 32px; color: var(--muted); font-size: .8rem; }
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <h1><span aria-hidden="true">💧</span> Ranoka</h1>
+    <div id="langs" aria-label="Language"></div>
+  </div>
+  <p id="tagline"></p>
+  <nav id="nav"></nav>
+</header>
+<main id="main" tabindex="-1"></main>
+<footer>OneAquaHealth IEEE Global Hackathon 2026 · HL7 FHIR R4 · works offline · data stays on your device</footer>
+<!-- SCRIPTS -->
+<script src="core.js"></script>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<!-- /SCRIPTS -->
+</body>
+</html>
